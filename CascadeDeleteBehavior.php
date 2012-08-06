@@ -8,6 +8,9 @@ class CascadeDeleteBehavior extends CActiveRecordBehavior
     const TYPE_ALL  = 'all';
     const TYPE_EACH = 'each';
     
+    const COMMAND_DELELE_ALL = 'delete';    
+    const COMMAND_UPDATE_ALL = 'update';
+    
     /**
      * array(
      *  'posts' => array('type' => CascadeDeleteBehavior::TYPE_ALL),
@@ -17,7 +20,7 @@ class CascadeDeleteBehavior extends CActiveRecordBehavior
      * @var array 
      */
     public $relations = array();
-    
+
     /**
      *
      * @param CModelEvent $event event parameter
@@ -25,7 +28,7 @@ class CascadeDeleteBehavior extends CActiveRecordBehavior
      */
     public function beforeDelete($event)
     {
-        $ownerRelations = $owner->relations();
+        $ownerRelations = $this->getOwner()->relations();
         foreach ($this->relations as $key => $value) {
             if (is_array($value)) {
                 $relation = $ownerRelations[$key];
@@ -49,6 +52,11 @@ class CascadeDeleteBehavior extends CActiveRecordBehavior
         if (empty($params['type']) || !in_array($params['type'], array(self::TYPE_ALL, self::TYPE_EACH))) {
             throw new CException('Incorrect value for "type" param.');
         }
+        
+        if (!empty($params['command']) && !in_array($params['command'], array(self::COMMAND_DELELE_ALL, self::COMMAND_UPDATE_ALL))) {
+            throw new CException('Incorrect value for "command" param.');
+        }
+        
         if ($params['type'] === self::TYPE_EACH) {
             $this->_deleteRelation($relation['_relation']);
         } else {
@@ -57,7 +65,11 @@ class CascadeDeleteBehavior extends CActiveRecordBehavior
             }
             $relationObject = CActiveRecord::model($relation[1]);
             list($condition, $params) = $this->_prepareConditionAndParams($relation);
-            $relationObject->deleteAll($condition, $params);
+            if (isset($relation['command']) && $relation['command'] === self::COMMAND_UPDATE_ALL && !empty($relation['attributes'])) {
+                $relationObject->updateAll($relation['attributes'], $condition, $params);
+            } else {
+                $relationObject->deleteAll($condition, $params);
+            }
         }            
     }
     
