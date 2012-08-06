@@ -16,7 +16,7 @@ class User extends CActiveRecord
     {
         return array(
             'CascadeDelete' => array(
-                'class'     => 'ext.cascadedeletebehavior.CascadeDeleteBehavior',
+                'class'     => 'ext.cascade_delete_behavior.CascadeDeleteBehavior',
                 'relations' => array(
                     'comments' => array('type' => CascadeDeleteBehavior::TYPE_ALL), //delete all - one query
                     'profile',
