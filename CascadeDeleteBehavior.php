@@ -64,11 +64,11 @@ class CascadeDeleteBehavior extends CActiveRecordBehavior
                 throw new CException('Not supported MANY MANY associations.');
             }
             $relationObject = CActiveRecord::model($relation[1]);
-            list($condition, $params) = $this->_prepareConditionAndParams($relation);
-            if (isset($relation['command']) && $relation['command'] === self::COMMAND_UPDATE_ALL && !empty($relation['attributes'])) {
-                $relationObject->updateAll($relation['attributes'], $condition, $params);
+            list($condition, $conditionParams) = $this->_prepareConditionAndParams($relation);
+            if (isset($params['command']) && $params['command'] === self::COMMAND_UPDATE_ALL && !empty($params['attributes'])) {
+                $relationObject->updateAll($params['attributes'], $condition, $conditionParams);
             } else {
-                $relationObject->deleteAll($condition, $params);
+                $relationObject->deleteAll($condition, $conditionParams);
             }
         }            
     }
